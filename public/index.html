@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Munky - Reject Humanity, Return to $Munky!</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
     <link rel="icon" type="image/webp" href="munky.webp">
     <style>
         /* Full Screen Video Background with Extra Zoom */
@@ -12,8 +13,18 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow-x: hidden; /* Allow vertical scrolling */
-            overflow-y: auto; /* Enable vertical scrolling */
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: 'Bungee', cursive;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating {
+            animation: float 2s ease-in-out infinite;
         }
 
         #video-background {
@@ -33,29 +44,13 @@
         /* Emoji Cursor - Preserved from original */
         body, a, button {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext x='0' y='28' font-size='32'%3E🚬%3C/text%3E%3C/svg%3E"), auto;
-            cursor: -webkit-image-set(
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext x='0' y='28' font-size='32'%3E🚬%3C/text%3E%3C/svg%3E") 1x
-            ), auto;
         }
 
-        /* Fallback cursor with explicit emoji */
-        body * {
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="0" y="28" font-size="32">🚬</text></svg>'), auto;
-        }
-
-        /* Additional Mobile Optimization */
-        @media (max-width: 768px) {
-            #video-background {
-                transform: translateX(-50%) translateY(-50%) scale(1.5);
-            }
-        }
-
-        /* Rest of the previous styles */
         body {
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9d56e);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
-            touch-action: pan-y; /* Allow vertical scrolling on touch devices */
+            touch-action: pan-y;
             min-height: 100vh;
         }
 
@@ -67,6 +62,13 @@
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
             transition: all 0.3s ease;
             width: 100%;
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            #video-background {
+                transform: translateX(-50%) translateY(-50%) scale(1.5);
+            }
         }
     </style>
 </head>
@@ -85,8 +87,8 @@
     <div class="container mx-auto px-4 py-8 flex-grow relative z-10">
         <div class="text-center mb-12">
             <img src="munky.webp" alt="Munky Logo" class="logo mx-auto w-48 h-48 rounded-full shadow-2xl mb-6 floating">
-            <h1 class="text-5xl font-extrabold mb-4 text-white drop-shadow-lg">Munky</h1>
-            <p class="text-2xl text-white font-semibold drop-shadow-md">Reject humanity, return to $Munky 🐒</p>
+            <h1 class="text-5xl font-extrabold mb-4 text-white drop-shadow-lg" style="font-family: 'Bungee', cursive;">Munky</h1>
+            <p class="text-2xl text-white font-semibold drop-shadow-md" style="font-family: 'Bungee', cursive;">Reject humanity, return to $Munky 🐒</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
