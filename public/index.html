@@ -7,29 +7,52 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="icon" type="image/webp" href="munky.webp">
     <style>
-        /* Mobile-First Optimizations */
-        html, body {
-            max-width: 100%;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Responsive Video Background */
+        /* Full Screen Video Background with Object-Fit */
         #video-background {
             position: fixed;
             top: 0;
             left: 0;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures video covers entire screen */
             z-index: -1000;
-            background: url('poster.jpg') no-repeat center center;
-            background-size: cover;
             opacity: 0.3;
         }
 
-        /* Mobile-Friendly Glassmorphism Cards */
+        /* Media Query for Responsive Video */
+        @media (max-aspect-ratio: 16/9) {
+            #video-background {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        @media (min-aspect-ratio: 16/9) {
+            #video-background {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        /* Rest of the previous mobile optimization styles remain the same */
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9d56e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            touch-action: manipulation;
+            min-height: 100vh;
+        }
+
         .glass-card {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
@@ -40,7 +63,7 @@
             width: 100%;
         }
 
-        /* Responsive Typography */
+        /* Mobile-specific optimizations */
         @media (max-width: 640px) {
             body {
                 font-size: 14px;
@@ -59,49 +82,18 @@
                 padding: 1rem;
             }
         }
-
-        /* Animated Background */
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        body {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9d56e);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-            touch-action: manipulation;
-        }
-
-        /* Floating Elements */
-        .floating {
-            animation: float 4s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-
-        /* Prevent text selection and callout */
-        body {
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            user-select: none;
-        }
-
-        /* Mobile Button Styling */
-        .mobile-button {
-            width: 100%;
-            margin-bottom: 1rem;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col touch-none">
-    <video autoplay loop muted playsinline id="video-background">
+    <video 
+        autoplay 
+        loop 
+        muted 
+        playsinline 
+        id="video-background"
+    >
         <source src="background.mp4" type="video/mp4">
+        Your browser does not support the video tag.
     </video>
 
     <div class="container mx-auto px-4 py-8 flex-grow relative z-10">
@@ -132,7 +124,6 @@
         </div>
 
         <div class="flex flex-col sm:flex-row justify-center gap-6 mb-12">
-            <!-- Buttons with mobile optimization -->
             <a href="#" class="glass-card text-white px-8 py-4 rounded-full inline-flex items-center hover:scale-105 transition-transform mobile-button justify-center">
                 🚀 Swap via Phantom
             </a>
@@ -156,12 +147,22 @@
             event.preventDefault();
         }, { passive: false });
 
-        // Adjust viewport on mobile
-        function adjustViewport() {
-            const viewport = document.querySelector('meta[name=viewport]');
-            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        // Adjust video for mobile and desktop
+        function adjustVideoBackground() {
+            const video = document.getElementById('video-background');
+            
+            // Ensure video fills the entire screen
+            video.style.position = 'fixed';
+            video.style.top = '0';
+            video.style.left = '0';
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
         }
-        adjustViewport();
+
+        // Run on load and resize
+        window.addEventListener('load', adjustVideoBackground);
+        window.addEventListener('resize', adjustVideoBackground);
     </script>
 </body>
 </html>
