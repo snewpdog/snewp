@@ -12,7 +12,8 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            overflow: hidden;
+            overflow-x: hidden; /* Allow vertical scrolling */
+            overflow-y: auto; /* Enable vertical scrolling */
         }
 
         #video-background {
@@ -29,7 +30,7 @@
             object-fit: cover;
         }
 
-        /* Emoji Cursor - Improved Cross-Browser Implementation */
+        /* Emoji Cursor - Preserved from original */
         body, a, button {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ctext x='0' y='28' font-size='32'%3E🚬%3C/text%3E%3C/svg%3E"), auto;
             cursor: -webkit-image-set(
@@ -54,7 +55,7 @@
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9d56e);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
-            touch-action: manipulation;
+            touch-action: pan-y; /* Allow vertical scrolling on touch devices */
             min-height: 100vh;
         }
 
@@ -69,7 +70,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col touch-none">
+<body class="min-h-screen flex flex-col">
     <video 
         autoplay 
         loop 
