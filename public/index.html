@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Munky - Reject Humanity, Return to $Munky!</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" type="image/webp" href="munky.webp">
+    <style>
+        /* Cursor Style */
+        body {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/%3E%3Cpath d='M12 12V7'/%3E%3C/svg%3E"), auto;
+        }
+
+        /* Video Background */
+        #video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1000;
+            background: url('poster.jpg') no-repeat;
+            background-size: cover;
+            opacity: 0.3;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.125);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Animated Background */
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9d56e);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        /* Floating Elements */
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <video autoplay loop muted id="video-background">
+        <source src="background.mp4" type="video/mp4">
+    </video>
+
+    <div class="container mx-auto px-4 py-8 flex-grow relative z-10">
+        <div class="text-center mb-12">
+            <img src="munky.webp" alt="Munky Logo" class="mx-auto w-48 h-48 rounded-full shadow-2xl mb-6 floating">
+            <h1 class="text-5xl font-extrabold mb-4 text-white drop-shadow-lg">Munky</h1>
+            <p class="text-2xl text-white font-semibold drop-shadow-md">Reject humanity, return to $Munky ??</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <div class="glass-card p-6 text-center">
+                <div class="text-sm text-white opacity-75 mb-2">Price (24h)</div>
+                <div class="text-2xl font-bold text-white" id="price">Loading...</div>
+                <div class="text-sm text-red-300" id="price-change">Loading...</div>
+            </div>
+            <div class="glass-card p-6 text-center">
+                <div class="text-sm text-white opacity-75 mb-2">24h Volume</div>
+                <div class="text-2xl font-bold text-white" id="volume">Loading...</div>
+            </div>
+            <div class="glass-card p-6 text-center">
+                <div class="text-sm text-white opacity-75 mb-2">Liquidity</div>
+                <div class="text-2xl font-bold text-white" id="liquidity">Loading...</div>
+            </div>
+            <div class="glass-card p-6 text-center">
+                <div class="text-sm text-white opacity-75 mb-2">Market Cap</div>
+                <div class="text-2xl font-bold text-white" id="marketcap">Loading...</div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-6 mb-12">
+            <!-- Buttons with glassmorphism -->
+            <a href="#" class="glass-card text-white px-8 py-4 rounded-full inline-flex items-center hover:scale-105 transition-transform">
+                ?? Swap via Phantom
+            </a>
+            <a href="#" class="glass-card text-white px-8 py-4 rounded-full inline-flex items-center hover:scale-105 transition-transform">
+                ?? Check on DEX
+            </a>
+            <a href="#" class="glass-card text-white px-8 py-4 rounded-full inline-flex items-center hover:scale-105 transition-transform">
+                ?? Join Telegram
+            </a>
+        </div>
+
+        <!-- More sections with similar glassmorphism design -->
+    </div>
+
+    <footer class="bg-black bg-opacity-50 text-white py-6 text-center">
+        <p>© 2024 Munky. Return to Monke ??</p>
+    </footer>
+
+    <script src="fetchData.js"></script>
+</body>
+</html>
