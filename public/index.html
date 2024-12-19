@@ -190,12 +190,13 @@
         window.addEventListener('resize', adjustVideoBackground);
     </script>
     <script src="fetchData.js"></script>
-	<script src="smoke.js"></script>
-<script>
-    // Initialize smoke effect after page load
-    window.addEventListener('load', () => {
-        new SmokeEffect();
-    });
+    <script src="smoke.js"></script>
+    <script>
+        // Initialize smoke effect after page load
+        window.addEventListener('load', () => {
+            console.log('Initializing smoke effect...'); // Add this for debugging
+            new SmokeEffect();
+        });
 </script>
 </body>
 </html>
