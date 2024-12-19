@@ -16,55 +16,69 @@ async function fetchData() {
 
         const attributes = data.data.attributes;
 
+        // Helper function to safely update DOM elements
+        const updateElement = (id, value, defaultValue = 'N/A') => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value || defaultValue;
+            }
+        };
+
         // Price and main stats
-        document.getElementById('price').textContent = `$${Number(attributes.price_in_usd).toFixed(8)}`;
+        if (attributes) {
+            // Update price if available
+            if (attributes.price_in_usd) {
+                updateElement('price', `$${Number(attributes.price_in_usd).toFixed(8)}`);
+            }
 
-        // Price change with color
-        const priceChange = attributes.price_percent_change;
-        const priceChangeElement = document.getElementById('price-change');
-        
-        // Ensure the % sign is included and handle the color
-        priceChangeElement.textContent = `${priceChange}`; 
-        
-        // Reset classes first to ensure clean slate
-        priceChangeElement.classList.remove('text-red-500', 'text-green-500');
-        
-        // Color coding based on price change
-        if (parseFloat(priceChange) >= 0) {
-            priceChangeElement.classList.add('text-green-500');
-        } else {
-            priceChangeElement.classList.add('text-red-500');
-        }
+            // Price change with color
+            const priceChangeElement = document.getElementById('price-change');
+            if (priceChangeElement && attributes.price_percent_change) {
+                const priceChange = attributes.price_percent_change;
+                priceChangeElement.textContent = `${priceChange}`;
+                
+                // Reset classes first to ensure clean slate
+                priceChangeElement.classList.remove('text-red-500', 'text-green-500');
+                
+                // Color coding based on price change
+                if (parseFloat(priceChange) >= 0) {
+                    priceChangeElement.classList.add('text-green-500');
+                } else {
+                    priceChangeElement.classList.add('text-red-500');
+                }
+            }
 
-        document.getElementById('volume').textContent = `$${formatNumber(attributes.from_volume_in_usd)}`;
-        document.getElementById('liquidity').textContent = `$${formatNumber(attributes.reserve_in_usd)}`;
-        document.getElementById('marketcap').textContent = `$${formatNumber(attributes.fully_diluted_valuation)}`;
+            // Update other metrics
+            updateElement('volume', attributes.from_volume_in_usd ? `$${formatNumber(attributes.from_volume_in_usd)}` : 'N/A');
+            updateElement('liquidity', attributes.reserve_in_usd ? `$${formatNumber(attributes.reserve_in_usd)}` : 'N/A');
+            updateElement('marketcap', attributes.fully_diluted_valuation ? `$${formatNumber(attributes.fully_diluted_valuation)}` : 'N/A');
 
-        // Trading activity (24h)
-        if (attributes.historical_data && attributes.historical_data.last_24h) {
-            const last24h = attributes.historical_data.last_24h;
-
-            // Total transactions (swaps)
-            document.getElementById('transactions').textContent = formatNumber(last24h.swaps_count);
-
-            // Buyers
-            document.getElementById('buyers').textContent = formatNumber(last24h.buyers_count);
-
-            // Sellers
-            document.getElementById('sellers').textContent = formatNumber(last24h.sellers_count);
-        } else {
-            console.log('No 24h historical data available');
-            ['transactions', 'buyers', 'sellers'].forEach(id => {
-                document.getElementById(id).textContent = '0';
-            });
+            // Trading activity (24h)
+            if (attributes.historical_data && attributes.historical_data.last_24h) {
+                const last24h = attributes.historical_data.last_24h;
+                updateElement('transactions', formatNumber(last24h.swaps_count));
+                updateElement('buyers', formatNumber(last24h.buyers_count));
+                updateElement('sellers', formatNumber(last24h.sellers_count));
+            } else {
+                ['transactions', 'buyers', 'sellers'].forEach(id => {
+                    updateElement(id, '0');
+                });
+            }
         }
     } catch (error) {
         console.error('Error fetching data:', error);
 
-        // Show error state in UI
+        // Show error state in UI but preserve price change if available
+        const priceChange = document.getElementById('price-change').textContent;
+        
         ['price', 'volume', 'liquidity', 'marketcap', 'transactions', 'buyers', 'sellers'].forEach(id => {
-            document.getElementById(id).textContent = 'Error';
+            updateElement(id, 'Error');
         });
+
+        // Restore price change if it was available
+        if (priceChange && priceChange !== 'Error') {
+            document.getElementById('price-change').textContent = priceChange;
+        }
 
         // Retry with a small delay
         setTimeout(fetchData, 5000);
