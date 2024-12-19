@@ -3,10 +3,10 @@ class SmokeEffect {
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
-        this.particleCount = 30; // Reduced count for larger particles
+        this.particleCount = 40; // Increased for better coverage
         this.fadeStarted = false;
         this.startTime = Date.now();
-        this.duration = 7000; // 7 seconds total (5 seconds main effect + 2 seconds fade)
+        this.duration = 7000; // 7 seconds total
         
         this.init();
     }
@@ -17,9 +17,10 @@ class SmokeEffect {
         this.canvas.style.left = '0';
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
-        this.canvas.style.zIndex = '1000';
+        this.canvas.style.zIndex = '9999'; // Increased z-index to be above everything
         this.canvas.style.pointerEvents = 'none';
         this.canvas.style.opacity = '1';
+        this.canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; // Initial background to ensure full coverage
         
         this.resize();
         document.body.appendChild(this.canvas);
@@ -45,13 +46,13 @@ class SmokeEffect {
 
         for (let i = 0; i < this.particleCount; i++) {
             this.particles.push({
-                x: centerX + (Math.random() - 0.5) * this.canvas.width * 0.8,
-                y: centerY + (Math.random() - 0.5) * this.canvas.height * 0.8,
-                radius: Math.random() * 100 + 50, // Much larger particles
-                vx: Math.random() * 0.5 - 0.25, // Slower movement
-                vy: Math.random() * 0.5 - 0.25,
-                opacity: Math.random() * 0.3 + 0.2, // Lower opacity for more natural look
-                blur: Math.random() * 50 + 30 // Added blur effect
+                x: centerX + (Math.random() - 0.5) * this.canvas.width,
+                y: centerY + (Math.random() - 0.5) * this.canvas.height,
+                radius: Math.random() * 150 + 100, // Even larger particles
+                vx: Math.random() * 0.3 - 0.15, // Slower movement
+                vy: Math.random() * 0.3 - 0.15,
+                opacity: Math.random() * 0.4 + 0.6, // Higher initial opacity
+                blur: Math.random() * 70 + 50 // Increased blur for smoother effect
             });
         }
     }
@@ -62,10 +63,9 @@ class SmokeEffect {
             particle.x, particle.y, particle.radius
         );
         
-        // More subtle gradient for realistic smoke
-        gradient.addColorStop(0, `rgba(240, 240, 240, ${particle.opacity})`);
-        gradient.addColorStop(0.4, `rgba(230, 230, 230, ${particle.opacity * 0.8})`);
-        gradient.addColorStop(1, 'rgba(220, 220, 220, 0)');
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${particle.opacity})`);
+        gradient.addColorStop(0.5, `rgba(255, 255, 255, ${particle.opacity * 0.8})`);
+        gradient.addColorStop(1, `rgba(255, 255, 255, ${particle.opacity * 0.3})`);
         
         this.ctx.save();
         this.ctx.filter = `blur(${particle.blur}px)`;
@@ -77,7 +77,9 @@ class SmokeEffect {
     }
 
     animate() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Start with a solid white background
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         const logo = document.querySelector('.logo');
         const logoRect = logo ? logo.getBoundingClientRect() : null;
@@ -86,11 +88,15 @@ class SmokeEffect {
             y: logoRect.top + logoRect.height / 2
         } : null;
 
-        // Calculate global opacity based on time
+        // Calculate global opacity
         const elapsed = Date.now() - this.startTime;
-        const globalOpacity = Math.max(0, 1 - (elapsed / this.duration));
+        let globalOpacity = 1;
         
-        this.ctx.globalAlpha = globalOpacity;
+        if (this.fadeStarted) {
+            globalOpacity = Math.max(0, 1 - ((elapsed - 5000) / (this.duration - 5000)));
+        }
+        
+        this.ctx.globalAlpha = 1; // Reset global alpha
 
         for (let i = 0; i < this.particles.length; i++) {
             const particle = this.particles[i];
@@ -98,7 +104,7 @@ class SmokeEffect {
             particle.x += particle.vx;
             particle.y += particle.vy;
             
-            // Smooth wrapping
+            // Wrap around screen
             if (particle.x < -particle.radius) particle.x = this.canvas.width + particle.radius;
             if (particle.x > this.canvas.width + particle.radius) particle.x = -particle.radius;
             if (particle.y < -particle.radius) particle.y = this.canvas.height + particle.radius;
@@ -109,17 +115,19 @@ class SmokeEffect {
                 const dx = particle.x - logoCenter.x;
                 const dy = particle.y - logoCenter.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                const maxDistance = Math.max(this.canvas.width, this.canvas.height);
+                const maxDistance = Math.max(this.canvas.width, this.canvas.height) * 0.5;
                 
-                particle.opacity *= 0.995;
-                particle.opacity *= (distance / maxDistance) * 0.995;
+                // Faster fade near logo
+                const fadeFactor = Math.min(1, distance / maxDistance);
+                particle.opacity *= 0.99;
+                particle.opacity *= fadeFactor;
             }
             
             this.drawSmoke(particle);
         }
 
-        // Composite multiple layers for more realistic effect
-        this.ctx.globalCompositeOperation = 'screen';
+        // Apply global fade
+        this.canvas.style.opacity = globalOpacity.toString();
         
         // Continue animation if not completely faded
         if (elapsed < this.duration) {
