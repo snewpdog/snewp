@@ -1,12 +1,13 @@
 class SmokeEffect {
     constructor() {
         console.log('SmokeEffect constructor called');
-        // Hide content immediately
+        this.maxLoadAttempts = 3;
+        this.loadAttempts = 0;
+        this.loadTimeout = 2000; // 2 seconds timeout
+        this.initialized = false;
         this.hideContent();
-        this.container = document.createElement('div');
-        this.video = document.createElement('video');
-        this.overlay = document.createElement('div');
-        this.init();
+        this.setupElements();
+        this.initWithRetry();
     }
 
     hideContent() {
@@ -23,20 +24,32 @@ class SmokeEffect {
     }
 
     showContent() {
-        // Remove the style tag to show content
-        const style = document.getElementById('smoke-effect-style');
-        if (style) {
-            style.textContent = `
-                body > *:not(#smoke-container):not(#smoke-overlay):not(#smoke-mask) {
-                    opacity: 1 !important;
-                    transition: opacity 0.5s ease-in-out;
-                }
-            `;
-        }
+        requestAnimationFrame(() => {
+            const style = document.getElementById('smoke-effect-style');
+            if (style) {
+                style.textContent = `
+                    body > *:not(#smoke-container):not(#smoke-overlay):not(#smoke-mask) {
+                        opacity: 1 !important;
+                        transition: opacity 0.5s ease-in-out;
+                    }
+                `;
+            }
+        });
     }
 
-    init() {
+    setupElements() {
+        // Setup container
+        this.container = document.createElement('div');
+        this.container.id = 'smoke-container';
+        this.container.style.position = 'fixed';
+        this.container.style.top = '50%';
+        this.container.style.left = '50%';
+        this.container.style.transform = 'translate(-50%, -50%)';
+        this.container.style.zIndex = '9999';
+        this.container.style.pointerEvents = 'none';
+        
         // Setup overlay
+        this.overlay = document.createElement('div');
         this.overlay.id = 'smoke-overlay';
         this.overlay.style.position = 'fixed';
         this.overlay.style.top = '0';
@@ -45,88 +58,104 @@ class SmokeEffect {
         this.overlay.style.height = '100%';
         this.overlay.style.backgroundColor = '#000';
         this.overlay.style.zIndex = '9998';
-        
-        // Setup container
-        this.container.id = 'smoke-container';
-        this.container.style.position = 'fixed';
-        this.container.style.top = '50%';
-        this.container.style.left = '50%';
-        this.container.style.width = '200%';
-        this.container.style.height = '200%';
-        this.container.style.transform = 'translate(-50%, -50%)';
-        this.container.style.zIndex = '9999';
-        this.container.style.pointerEvents = 'none';
-        
-        // Setup video with mobile-specific attributes
-        this.video.id = 'smoke-video';
-        this.video.src = '/smoke.mp4';
-        this.video.muted = true;
-        this.video.playsInline = true;
-        this.video.setAttribute('playsinline', ''); // iOS support
-        this.video.setAttribute('webkit-playsinline', ''); // iOS support
-        this.video.style.width = '100%';
-        this.video.style.height = '100%';
-        this.video.style.objectFit = 'cover';
-        this.video.style.opacity = '0.8';
-        this.video.style.mixBlendMode = 'screen';
-        this.video.style.filter = 'contrast(1.2) brightness(2)';
 
         // Add elements to DOM
-        this.container.appendChild(this.video);
         document.body.appendChild(this.overlay);
         document.body.appendChild(this.container);
-
-        // Handle video loading and errors
-        this.video.addEventListener('loadeddata', () => {
-            console.log('Video loaded, starting effect');
-            this.startVideo();
-        });
-
-        this.video.addEventListener('error', (e) => {
-            console.error('Video error:', e);
-            // If video fails, still show the content
-            this.showContent();
-            this.cleanup();
-        });
-
-        // Fallback if video takes too long to load
-        this.setupLoadingTimeout();
     }
 
-    setupLoadingTimeout() {
-        // If video takes more than 3 seconds to load, show content anyway
-        setTimeout(() => {
-            if (!this.video.readyState >= 4) {
-                console.log('Video taking too long to load, showing content');
-                this.showContent();
-                this.cleanup();
-            }
-        }, 3000);
-    }
-
-    async startVideo() {
-        try {
-            await this.video.play();
-            // Wait a bit before starting the reveal
-            setTimeout(() => this.startReveal(), 1000);
-        } catch (err) {
-            console.error('Error playing video:', err);
-            // If video fails to play, show content
-            this.showContent();
-            this.cleanup();
-        }
-    }
-
-    startReveal() {
-        const logo = document.querySelector('.logo');
-        if (!logo) {
-            console.error('Logo element not found');
-            this.showContent();
-            this.cleanup();
+    async initWithRetry() {
+        if (this.loadAttempts >= this.maxLoadAttempts) {
+            console.log('Max load attempts reached, showing content');
+            this.showContentAndCleanup();
             return;
         }
 
-        // Create mask for reveal effect
+        this.loadAttempts++;
+        console.log(`Attempt ${this.loadAttempts} to initialize smoke effect`);
+
+        try {
+            await this.initializeVideo();
+        } catch (error) {
+            console.error('Failed to initialize video:', error);
+            setTimeout(() => this.initWithRetry(), 1000);
+        }
+    }
+
+    async initializeVideo() {
+        return new Promise((resolve, reject) => {
+            // Create new video element
+            this.video = document.createElement('video');
+            this.video.id = 'smoke-video';
+            
+            // Set up video properties
+            const videoProperties = {
+                src: '/smoke.mp4',
+                muted: true,
+                playsInline: true,
+                autoplay: true,
+                style: {
+                    width: '100vw',
+                    height: '100vh',
+                    objectFit: 'cover',
+                    opacity: '0.8',
+                    mixBlendMode: 'screen',
+                    filter: 'contrast(1.2) brightness(2)',
+                    transform: 'scale(2)',
+                }
+            };
+
+            // Apply properties
+            Object.assign(this.video, videoProperties);
+            Object.assign(this.video.style, videoProperties.style);
+
+            // Set additional attributes for mobile
+            this.video.setAttribute('playsinline', '');
+            this.video.setAttribute('webkit-playsinline', '');
+
+            // Clear container and add video
+            this.container.innerHTML = '';
+            this.container.appendChild(this.video);
+
+            // Set up event listeners
+            let loadTimeout = setTimeout(() => {
+                reject(new Error('Video load timeout'));
+            }, this.loadTimeout);
+
+            this.video.addEventListener('loadeddata', async () => {
+                clearTimeout(loadTimeout);
+                console.log('Video loaded successfully');
+                try {
+                    await this.video.play();
+                    this.initialized = true;
+                    setTimeout(() => this.startReveal(), 1000);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            });
+
+            this.video.addEventListener('error', (e) => {
+                clearTimeout(loadTimeout);
+                reject(new Error(`Video error: ${this.video.error?.message || 'Unknown error'}`));
+            });
+        });
+    }
+
+    startReveal() {
+        if (!this.initialized) return;
+
+        const logo = document.querySelector('.logo');
+        if (!logo) {
+            this.showContentAndCleanup();
+            return;
+        }
+
+        // Get viewport dimensions
+        const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+        // Create mask
         const mask = document.createElement('div');
         mask.id = 'smoke-mask';
         mask.style.position = 'fixed';
@@ -137,47 +166,50 @@ class SmokeEffect {
         mask.style.zIndex = '9997';
         document.body.appendChild(mask);
 
-        // Get logo position relative to viewport
+        // Get logo position and adjust for current scroll position
         const logoRect = logo.getBoundingClientRect();
-        const centerX = logoRect.left + logoRect.width / 2;
-        const centerY = logoRect.top + logoRect.height / 2;
+        const centerX = logoRect.left + (logoRect.width / 2);
+        const centerY = logoRect.top + (logoRect.height / 2);
+
+        // Show content before animation
+        this.showContent();
 
         // Animation variables
-        let progress = 0;
-        const animationDuration = 3000;
         const startTime = Date.now();
-        const maxRadius = Math.max(
-            Math.sqrt(Math.pow(window.innerWidth, 2) + Math.pow(window.innerHeight, 2))
-        ) * 1.5; // Make sure it covers the entire screen
-
-        // Show content before starting animation
-        this.showContent();
+        const animationDuration = 3000;
+        const maxRadius = Math.sqrt(Math.pow(vw, 2) + Math.pow(vh, 2)) * 1.5;
 
         const animate = () => {
             const elapsed = Date.now() - startTime;
-            progress = Math.min(elapsed / animationDuration, 1);
-
+            const progress = Math.min(elapsed / animationDuration, 1);
             const currentRadius = maxRadius * progress;
-            const gradientMask = `radial-gradient(circle ${currentRadius}px at ${centerX}px ${centerY}px, 
-                                                transparent 0%, 
-                                                black 70%)`;
-            mask.style.background = gradientMask;
 
-            this.container.style.opacity = Math.max(0, 1 - progress);
-            this.overlay.style.opacity = Math.max(0, 1 - progress);
+            requestAnimationFrame(() => {
+                const gradientMask = `radial-gradient(circle ${currentRadius}px at ${centerX}px ${centerY}px, 
+                                                    transparent 0%, 
+                                                    black 70%)`;
+                mask.style.background = gradientMask;
 
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                this.cleanup();
-            }
+                this.container.style.opacity = Math.max(0, 1 - progress);
+                this.overlay.style.opacity = Math.max(0, 1 - progress);
+
+                if (progress < 1) {
+                    animate();
+                } else {
+                    this.cleanup();
+                }
+            });
         };
 
         animate();
     }
 
+    showContentAndCleanup() {
+        this.showContent();
+        this.cleanup();
+    }
+
     cleanup() {
-        // Remove all effect elements
         const elements = [
             this.container,
             this.overlay,
@@ -185,15 +217,32 @@ class SmokeEffect {
             document.getElementById('smoke-effect-style')
         ];
         
-        elements.forEach(el => el?.remove());
+        elements.forEach(el => {
+            if (el && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
     }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+// Initialize when DOM is ready and handle potential errors
+const initSmokeEffect = () => {
+    try {
         new SmokeEffect();
-    });
+    } catch (error) {
+        console.error('Failed to initialize smoke effect:', error);
+        // Remove any leftover elements
+        ['smoke-container', 'smoke-overlay', 'smoke-mask', 'smoke-effect-style'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        });
+        // Show content
+        document.body.style.opacity = '1';
+    }
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSmokeEffect);
 } else {
-    new SmokeEffect();
+    initSmokeEffect();
 }
