@@ -90,7 +90,7 @@ class SmokeEffect {
             
             // Set up video properties
             const videoProperties = {
-                src: '/smoke.mp4',
+                src: '/smoke.webm',
                 muted: true,
                 playsInline: true,
                 autoplay: true,
