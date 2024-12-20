@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET');
 
-const apiUrl = 'https://app.geckoterminal.com/api/p1/solana/pools/3pxry8kiJHwe5UUrucznH26Yao9MgQ6T6GkZC1HXpump?include=dex,dex.network.explorers,dex_link_services,network_link_services,pairs,token_link_services,tokens.token_security_metric,tokens.tags,pool_locked_liquidities&base_token=0&time_frame=24h';
+const apiUrl = 'https://app.geckoterminal.com/api/p1/solana/pools/5v234ZHRJw1xvoAxcTNPWjpeKui7svYTRUSysAgbaEnm?include=dex,dex.network.explorers,dex_link_services,network_link_services,pairs,token_link_services,tokens.token_security_metric,tokens.tags,pool_locked_liquidities&base_token=0&time_frame=24h';
         const response = await axios.get(apiUrl, {
             headers: {
                 'Accept': 'application/json',
